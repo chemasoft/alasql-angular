@@ -1,6 +1,7 @@
 import { Fila } from './Fila';
 import { Campo } from './Campo';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 // Clase donde se almacenan los datos
 export class Tabla {
@@ -22,8 +23,8 @@ export class Tabla {
     }
 
     // Cargar CSV en Tabla
-    public cargarCSV(readPath: string, separador: string): Promise<Tabla> {
-        const promise: Promise<Tabla> = new Promise((resolve, reject) => {
+    public cargarCSV(readPath: string, separador: string): Observable<Tabla> {
+        const observable = new Observable<Tabla>(observer => {
             this.http.get(readPath, { responseType: 'text' }).subscribe(data => {
                 const lineas = data.split('\n'); // Dividimos en lineas
                 // leemos la cabecera
@@ -43,11 +44,11 @@ export class Tabla {
                         this.datos.push(fila);
                     }
                 }
-                resolve(this);
+                observer.next(this);
             });
         });
 
-        return promise;
+        return observable;        
     }
 
     // Devuelve la ultima fila, si no hay devuelve vacia

@@ -1,4 +1,5 @@
 import { Tabla } from './Tabla';
+import { HttpClient } from '@angular/common/http';
 
 // Clase base de datos
 export class Basedatos {
@@ -6,22 +7,27 @@ export class Basedatos {
     public static mscCSV = 'CSV';
 
     // Propiedades de la base de datos
-    private nombre: string; // Nombre de la base de datos
+    private op: OpcionesBD; // Opciones de la base de datos
     private tablas: Tabla[] = []; // Conjunto de tablas de la base de datos
 
-    private cargarTablasBD(confTablas: ConfigTabla[]) {
 
+    public cargarTablasBD() {
+        for(const item of this.op.configTablas) {
+            const tabla = new Tabla(this.http, item.primaryKey);
+            tabla.cargarCSV(item.pathArchivo, item.separador).subscribe((Tabla) => {
+                alert('Carga completada');
+            });
+        }
     }
 
     // Devuelve el nombre de la base de datos
     public getNombreBD(op: OpcionesBD) {
-        return this.nombre;
-        this.cargarTablasBD(op.configTablas);
+        return this.op.nombre;
     }
 
-    constructor(op: OpcionesBD) {
-        this.nombre = op.nombre;
-
+    constructor(op: OpcionesBD, private http: HttpClient) {
+        this.op = op;
+        this.http = http;
     }
 
     // Ejecutar una consulta en la base de datos
@@ -42,5 +48,7 @@ export interface OpcionesBD {
 export interface ConfigTabla {
     pathArchivo: string; // ruta del archivo a cargar
     tipoArchivo: string; // tipo del archivo a cargar
+    separador: string; // Valido para los archivos csv
+    primaryKey: string[]; // Clave primaria de la tabla
 }
 

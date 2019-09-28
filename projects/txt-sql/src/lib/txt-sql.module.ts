@@ -1,12 +1,9 @@
 import { NgModule } from '@angular/core';
-import { TxtSqlComponent } from './txt-sql.component';
-
-
 
 @NgModule({
-  declarations: [TxtSqlComponent],
+  declarations: [],
   imports: [
   ],
-  exports: [TxtSqlComponent]
+  exports: []
 })
 export class TxtSqlModule { }
