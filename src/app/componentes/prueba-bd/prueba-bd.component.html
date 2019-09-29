@@ -1,10 +1,18 @@
-<p>{{Estado}}</p>
-
-<form>
-    <div class="form-group">
-      <input type="text" class="form-control" placeholder="Consulta SQL">
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <form>
+        <div class="form-group">
+          <input [(ngModel)]="sql" type="text" class="form-control" placeholder="Consulta SQL">
+        </div>
+        <button (click)="ejecutarSQL()" class="btn btn-primary">Ejecutar</button>
+      </form>
+      <p>{{resultado}}</p>
     </div>
-    <button type="submit" class="btn btn-primary">Ejecutar</button>
-  </form>
-
-  <p>{{resultado}}</p>
+    <div class="col-sm">
+      <small *ngFor="let item of estados">
+        {{item}} <br>
+      </small>
+    </div>
+  </div>
+</div>

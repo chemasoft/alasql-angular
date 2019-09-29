@@ -2,6 +2,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Basedatos } from 'projects/txt-sql/src/public-api';
 import { HttpClient } from '@angular/common/http';
+import { parse } from 'url';
+import * as parser from 'js-sql-parser';
 
 @Component({
   selector: 'app-prueba-bd',
@@ -11,17 +13,59 @@ import { HttpClient } from '@angular/common/http';
 export class PruebaBDComponent implements OnInit {
   bd: Basedatos;
   
-  estado: string;
-  sql: string;
+  estados: string[] = []; // Estados por los que va pasando la base de datos al abrirse
+  sql = '';
   resultado: string;
 
   constructor(private http: HttpClient) { }
+
+  ejecutarSQL() {
+    const ast = parser.parse('select * from dual');
+
+    console.log(JSON.stringify(ast, null, 2));
+
+  }
 
   ngOnInit() {
     //Configurar la base de datos
     this.bd = new Basedatos({
       nombre: 'prueba',
-      configTablas: [
+      configTablas: [  // Para este ejemplo cargamos la misma tabla varias veces
+        {
+          pathArchivo: './assets/embalses.csv',
+          tipoArchivo: Basedatos.mscCSV,
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
+        },
+        {
+          pathArchivo: './assets/embalses.csv',
+          tipoArchivo: Basedatos.mscCSV,
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
+        },
+        {
+          pathArchivo: './assets/embalses.csv',
+          tipoArchivo: Basedatos.mscCSV,
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
+        },
+        {
+          pathArchivo: './assets/embalses.csv',
+          tipoArchivo: Basedatos.mscCSV,
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
+        },
+        {
+          pathArchivo: './assets/embalses.csv',
+          tipoArchivo: Basedatos.mscCSV,
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
+        },
         {
           pathArchivo: './assets/embalses.csv',
           tipoArchivo: Basedatos.mscCSV,
@@ -29,12 +73,16 @@ export class PruebaBDComponent implements OnInit {
           separador: ';',
           nombreTabla: 'embalses'
         }
+
       ]
     }, this.http);
 
-    this.estado = 'Iniciando la carga de tablas';
+    this.estados.push('Iniciando la carga de tablas...');
+    let start = Date.now();
     this.bd.cargarTablasBD().subscribe((nombre) => {
-      this.estado += 'Tabla ' + nombre + ' cargada' + '\n'; 
+      const end = Date.now();
+      this.estados.push('Tabla ' + nombre + ' cargada: ' + (end - start) + ' ms'); 
+      start = Date.now();
     });
 
   }
