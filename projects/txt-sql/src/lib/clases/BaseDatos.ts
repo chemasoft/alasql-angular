@@ -1,5 +1,6 @@
 import { Tabla } from './Tabla';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 // Clase base de datos
 export class Basedatos {
@@ -12,12 +13,16 @@ export class Basedatos {
 
 
     public cargarTablasBD() {
-        for(const item of this.op.configTablas) {
-            const tabla = new Tabla(this.http, item.primaryKey);
-            tabla.cargarCSV(item.pathArchivo, item.separador).subscribe((Tabla) => {
-                alert('Carga completada');
-            });
-        }
+        const observable = new Observable<string>(observer => {
+            for(const item of this.op.configTablas) {
+                const tabla = new Tabla(this.http, item.primaryKey);
+                tabla.cargarCSV(item.pathArchivo, item.separador).subscribe((Tabla) => {
+                    observer.next(item.nombreTabla);
+                });
+            }
+        });
+        
+        return observable;
     }
 
     // Devuelve el nombre de la base de datos
@@ -46,6 +51,7 @@ export interface OpcionesBD {
 
 // Configuración de cada tabla de la base de datos
 export interface ConfigTabla {
+    nombreTabla: string;
     pathArchivo: string; // ruta del archivo a cargar
     tipoArchivo: string; // tipo del archivo a cargar
     separador: string; // Valido para los archivos csv

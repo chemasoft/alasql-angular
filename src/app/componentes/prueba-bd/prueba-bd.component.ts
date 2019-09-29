@@ -10,8 +10,11 @@ import { HttpClient } from '@angular/common/http';
 })
 export class PruebaBDComponent implements OnInit {
   bd: Basedatos;
-  inicio: string;
-  fin: string;
+  
+  estado: string;
+  sql: string;
+  resultado: string;
+
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
@@ -22,13 +25,17 @@ export class PruebaBDComponent implements OnInit {
         {
           pathArchivo: './assets/embalses.csv',
           tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion'],
-          separador: ','
+          primaryKey: ['Numero_de_estacion','fecha'],
+          separador: ';',
+          nombreTabla: 'embalses'
         }
       ]
     }, this.http);
 
-    this.bd.cargarTablasBD();
+    this.estado = 'Iniciando la carga de tablas';
+    this.bd.cargarTablasBD().subscribe((nombre) => {
+      this.estado += 'Tabla ' + nombre + ' cargada' + '\n'; 
+    });
 
   }
 
