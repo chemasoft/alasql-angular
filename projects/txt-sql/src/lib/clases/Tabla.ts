@@ -4,6 +4,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 // Clase donde se almacenan los datos
+
+export interface Iquery {
+    nombreCampos: string[];
+    comparadores: string[];
+    valores: any[];
+}
 export class Tabla {
     private datos: Fila[] = []; // Lista de filas
     private primaryKey: string[]; // Establece los campos que son la clave primaria
@@ -48,7 +54,7 @@ export class Tabla {
             });
         });
 
-        return observable;        
+        return observable;
     }
 
     // Devuelve la ultima fila, si no hay devuelve vacia
@@ -103,55 +109,37 @@ export class Tabla {
         return this;
     }
 
-    // Filtrar Campos
-    public filtrarPorcampo(pnomcampos: string[], pcomparador: string, pvalores: string[]): Tabla {
+    // Filtro AND
+    public filtroAND(pQuery: Iquery): Tabla {
         const d: Tabla = new Tabla(this.http, this.primaryKey);
-        let addFila: boolean;
-        const compararCampos = (fila: Fila, nomcampos: string[], valores: string[], comparador: string): boolean => {
-            switch (comparador) {
-                case '=':
-                    // tslint:disable-next-line: prefer-for-of
-                    for (let i = 0; i < nomcampos.length; i++) {
-                        if (fila.getCampoName(nomcampos[i]).getValor() === valores[i]) {
-                        } else {
+
+        // Dada una fila devuelve true si se cumple el criterio y false en otro caso
+        const comprobarCriterio = (fila: Fila, q: Iquery): boolean => {
+            for (const [i, nom] of q.nombreCampos.entries()) {
+                switch (q.comparadores[i]) {
+                    case '=':
+                        if (fila.getCampoName(nom).getValor() !== q.valores[i]) {
                             return(false);
                         }
-                    }
-                    break;
-                case '!=':
-                    // tslint:disable-next-line: prefer-for-of
-                    for (let i = 0; i < nomcampos.length; i++) {
-                        if (fila.getCampoName(nomcampos[i]).getValor() !== valores[i]) {
-                        } else {
+                        break;
+                    case '!=':
+                        if (fila.getCampoName(nom).getValor() === q.valores[i]) {
                             return(false);
                         }
-                    }
-                    break;
-                case '>':
-                    // tslint:disable-next-line: prefer-for-of
-                    for (let i = 0; i < nomcampos.length; i++) {
-                        if (fila.getCampoName(nomcampos[i]).getValor() > valores[i]) {
-                        } else {
+                        break;
+                    case '>':
+                        if (fila.getCampoName(nom).getValor() <= q.valores[i]) {
                             return(false);
                         }
-                    }
-                    break;
-                case '<':
-                    // tslint:disable-next-line: prefer-for-of
-                    for (let i = 0; i < nomcampos.length; i++) {
-                        if (fila.getCampoName(nomcampos[i]).getValor() < valores[i]) {
-                        } else {
-                            return(false);
-                        }
-                    }
-                    break;
+                        break;
+                }
             }
+
             return(true);
         };
 
         for (const fila of this.datos) {
-            addFila = true; // Por defecto se añade la fila
-            if (compararCampos(fila, pnomcampos, pvalores, pcomparador)) {
+            if (comprobarCriterio(fila, pQuery)) {
                 d.addFila(fila);
             }
         }

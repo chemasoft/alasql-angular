@@ -14,14 +14,14 @@ export class Basedatos {
 
     public cargarTablasBD() {
         const observable = new Observable<string>(observer => {
-            for(const item of this.op.configTablas) {
+            for (const item of this.op.configTablas) {
                 const tabla = new Tabla(this.http, item.primaryKey);
                 tabla.cargarCSV(item.pathArchivo, item.separador).subscribe((Tabla) => {
                     observer.next(item.nombreTabla);
                 });
             }
         });
-        
+
         return observable;
     }
 
