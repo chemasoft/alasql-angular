@@ -14,7 +14,9 @@ export class Tabla {
     private datos: Fila[] = []; // Lista de filas
     private primaryKey: string[]; // Establece los campos que son la clave primaria
 
-    constructor(private http: HttpClient, primaryKey: string[]) {
+    constructor(private http: HttpClient) {}
+
+    public setPrimaryKey(primaryKey: string[]) {
         this.primaryKey = primaryKey;
     }
 
@@ -101,8 +103,28 @@ export class Tabla {
             if (numCaracteres) {
                 fila.getCampoName(nomCampo).setvalor(fila.getCampoName(nomCampo).getValor().substring(posInicial, numCaracteres));
             } else {
-                fila.getCampoName(nomCampo).setValor(fila.getCampoName(nomCampo))
-                .getValor().substring(posInicial, fila.getCampoName(nomCampo).getValor().length);
+                fila.getCampoName(nomCampo).setValor(
+                    fila.getCampoName(nomCampo).getValor().substring(posInicial, fila.getCampoName(nomCampo).getValor().length));
+            }
+        }
+
+        return this;
+    }
+
+    // filtro OR, unir 2 Tablas
+    public UNION(datos: Tabla): Tabla {
+        let encontrado: boolean;
+        for (const fila of datos.getDatos()) { // Fila que voy a insertar
+            for (const item of this.datos) {   // Fila que voy a ampliar
+                encontrado = true;
+                for (const key of this.primaryKey) {
+                    if (item.getCampoName(key).getNombre() !== fila.getCampoName(key).getNombre()) {
+                        encontrado = false;
+                    }
+                }
+                if (encontrado) { // En este caso uno las filas
+                    item.unirFilas(fila);
+                }
             }
         }
 
@@ -110,8 +132,8 @@ export class Tabla {
     }
 
     // Filtro AND
-    public filtroAND(pQuery: Iquery): Tabla {
-        const d: Tabla = new Tabla(this.http, this.primaryKey);
+    public AND(pQuery: Iquery): Tabla {
+        const d: Tabla = new Tabla(this.http);
 
         // Dada una fila devuelve true si se cumple el criterio y false en otro caso
         const comprobarCriterio = (fila: Fila, q: Iquery): boolean => {
@@ -132,6 +154,21 @@ export class Tabla {
                             return(false);
                         }
                         break;
+                    case '<':
+                        if (fila.getCampoName(nom).getValor() >= q.valores[i]) {
+                            return(false);
+                        }
+                        break;
+                    case '>=':
+                        if (fila.getCampoName(nom).getValor() < q.valores[i]) {
+                            return(false);
+                        }
+                        break;
+                    case '<=':
+                        if (fila.getCampoName(nom).getValor() > q.valores[i]) {
+                            return(false);
+                        }
+                        break;
                 }
             }
 
@@ -149,7 +186,7 @@ export class Tabla {
 
     // Agrupar por varios campos
     public agruparPorCampo(nomcampo: string[]): Tabla {
-        const ldatos: Tabla = new Tabla(this.http, this.primaryKey);
+        const ldatos: Tabla = new Tabla(this.http);
         const valCampo: string[][] = [];
         const arraysIguales = (a1: string[], a2: string[]) => {
             for (const [i, a] of a1.entries()) {
@@ -182,26 +219,6 @@ export class Tabla {
         return ldatos;
     }
 
-
-    // Unir 2 Tabla
-    public unirTabla(datos: Tabla): Tabla {
-        let encontrado: boolean;
-        for (const fila of datos.getDatos()) { // Fila que voy a insertar
-            for (const item of this.datos) {   // Fila que voy a ampliar
-                encontrado = true;
-                for (const key of this.primaryKey) {
-                    if (item.getCampoName(key).getNombre() !== fila.getCampoName(key).getNombre()) {
-                        encontrado = false;
-                    }
-                }
-                if (encontrado) { // En este caso uno las filas
-                    item.unirFilas(fila);
-                }
-            }
-        }
-
-        return this;
-    }
 
     // Dada una columna hace un split y crea nuevas columnas
     public splitColumna(nomCol: string, simbolo: string, nuevosNombres: string[]): Tabla {

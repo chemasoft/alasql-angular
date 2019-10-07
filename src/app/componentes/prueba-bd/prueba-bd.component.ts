@@ -12,7 +12,7 @@ import * as parser from 'js-sql-parser';
 })
 export class PruebaBDComponent implements OnInit {
   bd: Basedatos;
-  
+
   estados: string[] = []; // Estados por los que va pasando la base de datos al abrirse
   sql = '';
   resultado: string;
@@ -27,53 +27,17 @@ export class PruebaBDComponent implements OnInit {
   }
 
   ngOnInit() {
-    //Configurar la base de datos
+    // Configurar la base de datos
     this.bd = new Basedatos({
       nombre: 'prueba',
       configTablas: [  // Para este ejemplo cargamos la misma tabla varias veces
         {
           pathArchivo: './assets/embalses.csv',
           tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        },
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        },
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        },
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        },
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        },
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion','fecha'],
+          primaryKey: ['Numero_de_estacion', 'fecha'],
           separador: ';',
           nombreTabla: 'embalses'
         }
-
       ]
     }, this.http);
 
@@ -81,7 +45,7 @@ export class PruebaBDComponent implements OnInit {
     let start = Date.now();
     this.bd.cargarTablasBD().subscribe((nombre) => {
       const end = Date.now();
-      this.estados.push('Tabla ' + nombre + ' cargada: ' + (end - start) + ' ms'); 
+      this.estados.push('Tabla ' + nombre + ' cargada: ' + (end - start) + ' ms');
       start = Date.now();
     });
 

@@ -1,8 +1,50 @@
 // Es un campo del listdatos
+export enum TipoDatos {
+    string = 1,
+    number = 2,
+    date = 3,
+    boolean = 4
+}
+
 export class Campo {
     private nombre: string;
-    private valor: string;
+    private tipo: TipoDatos;
+    private valor: any;
     private visible: boolean;
+
+    // Establece el tipo de dato
+    private setTipoDato(val: string): void {
+        let d: any;
+
+        // Compruebo numero
+        d = parseFloat(d);
+        if (!isNaN(d)) {
+            this.tipo = TipoDatos.number;
+            this.valor = d;
+            return;
+        }
+
+        // Compruebo fecha
+        d = new Date(val);
+        if (!isNaN(d.getTime())) {
+            this.tipo = TipoDatos.date;
+            this.valor = d;
+            return;
+        }
+
+        // Compruebo boolean
+        d = Boolean(val);
+        if (!isNaN(d)) {
+            this.tipo = TipoDatos.boolean;
+            this.valor = d;
+            return;
+        }
+
+        // En otro caso es string
+        this.tipo = TipoDatos.string;
+        this.valor = val;
+    }
+
 
     public getNombre(): string {
         return this.nombre;
@@ -12,12 +54,12 @@ export class Campo {
         this.nombre = n;
     }
 
-    public getValor(): string {
+    public getValor(): any {
         return this.valor;
     }
 
     public setvalor(v: string) {
-        this.valor = v;
+        this.setTipoDato(v);
     }
 
     public getVisible(): boolean {
@@ -33,9 +75,9 @@ export class Campo {
     }
 
     // Establece el valor del campo y normaliza
-    public setCampo(n: string, v: any): Campo {
+    public setCampo(n: string, v: string): Campo {
         this.nombre = n;
-        this.valor = v;
+        this.setTipoDato(v);
 
         this.normalizar();
 
@@ -43,15 +85,15 @@ export class Campo {
     }
 
     // Establece el campo sin normalizar
-    public setCampoSN(n: string, v: any): Campo {
+    public setCampoSN(n: string, v: string): Campo {
         this.nombre = n;
-        this.valor = v;
+        this.setTipoDato(v);
 
         return this;
     }
 
-    public setValor(v: any): Campo {
-        this.valor = v;
+    public setValor(v: string): Campo {
+        this.setTipoDato(v);
         this.normalizar();
         return this;
     }

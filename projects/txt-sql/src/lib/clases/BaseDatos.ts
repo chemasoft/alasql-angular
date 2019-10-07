@@ -15,8 +15,8 @@ export class Basedatos {
     public cargarTablasBD() {
         const observable = new Observable<string>(observer => {
             for (const item of this.op.configTablas) {
-                const tabla = new Tabla(this.http, item.primaryKey);
-                tabla.cargarCSV(item.pathArchivo, item.separador).subscribe((Tabla) => {
+                const tabla = new Tabla(this.http);
+                tabla.cargarCSV(item.pathArchivo, item.separador).subscribe(() => {
                     observer.next(item.nombreTabla);
                 });
             }
