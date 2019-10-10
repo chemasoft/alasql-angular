@@ -52,7 +52,7 @@ export class Tabla {
                         this.datos.push(fila);
                     }
                 }
-                observer.next(this);
+                observer.complete();
             });
         });
 

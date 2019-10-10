@@ -1,9 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
-import { Basedatos } from 'projects/txt-sql/src/public-api';
+import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/txt-sql/src/public-api';
 import { HttpClient } from '@angular/common/http';
-import { parse } from 'url';
-import * as parser from 'js-sql-parser';
 
 @Component({
   selector: 'app-prueba-bd',
@@ -19,36 +17,58 @@ export class PruebaBDComponent implements OnInit {
 
   constructor(private http: HttpClient) { }
 
-  ejecutarSQL() {
-    const ast = parser.parse('select * from dual');
-
-    console.log(JSON.stringify(ast, null, 2));
-
+  ngOnInit() {
+    this.iniciarBDCSV();
+    //this.iniciarBDAPI();
   }
 
-  ngOnInit() {
+  ejecutarSQL() {
+    this.bd.query(this.sql);
+  }
+
+  private iniciarBDCSV() {
     // Configurar la base de datos
     this.bd = new Basedatos({
-      nombre: 'prueba',
-      configTablas: [  // Para este ejemplo cargamos la misma tabla varias veces
-        {
-          pathArchivo: './assets/embalses.csv',
-          tipoArchivo: Basedatos.mscCSV,
-          primaryKey: ['Numero_de_estacion', 'fecha'],
-          separador: ';',
-          nombreTabla: 'embalses'
-        }
-      ]
+      tipoConexion: tiposConexion.FILE,
+      opciones: {
+        nombre: 'prueba',
+        configTablas: [
+          {
+            nombreTabla: 'embalses',
+            pathArchivo: './assets/embalses.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['Numero_de_estacion', 'fecha']
+          }
+        ]
+      }
     }, this.http);
 
     this.estados.push('Iniciando la carga de tablas...');
     let start = Date.now();
-    this.bd.cargarTablasBD().subscribe((nombre) => {
-      const end = Date.now();
-      this.estados.push('Tabla ' + nombre + ' cargada: ' + (end - start) + ' ms');
-      start = Date.now();
+    this.bd.inicializarBD().subscribe({
+      next: (tabla) => {
+        const end = Date.now();
+        this.estados.push('Tabla ' + tabla + ' cargada: ' + (end - start) + ' ms');
+        start = Date.now();
+      },
+      complete: () => {
+        console.log("Inicialización de Base de datos completada");
+      }
     });
-
   }
 
+  private iniciarBDAPI() {
+    // Configurar la base de datos
+    this.bd = new Basedatos({
+      tipoConexion: tiposConexion.API,
+      opciones: {
+        nombre: 'prueba',
+        url: 'https://34.77.1.10/query',
+        parametroSQL: 'sql'
+      }
+    }, this.http);
+
+    this.bd.inicializarBD(); // Inicializar la Base de datos
+  }
 }

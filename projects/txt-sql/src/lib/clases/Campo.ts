@@ -3,7 +3,8 @@ export enum TipoDatos {
     string = 1,
     number = 2,
     date = 3,
-    boolean = 4
+    boolean = 4,
+    hora = 5
 }
 
 export class Campo {
@@ -12,31 +13,51 @@ export class Campo {
     private valor: any;
     private visible: boolean;
 
+    private isFecha(val: string) {
+        return val.match(/^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/);
+    }
+
+    private isHora(val: string) {
+        return val.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/);
+    }
+
+    private isNumber(val: string): boolean {
+        return (!isNaN(parseFloat(val)));
+    }
+
+    private isBoolean(val: string): boolean {
+        return (val === 'true') || (val === 'false');
+    }
+
     // Establece el tipo de dato
     private setTipoDato(val: string): void {
         let d: any;
 
-        // Compruebo numero
-        d = parseFloat(d);
-        if (!isNaN(d)) {
-            this.tipo = TipoDatos.number;
-            this.valor = d;
+        // Compruebo fecha
+        if(this.isFecha(val)) {   
+            this.tipo = TipoDatos.date;
+            this.valor = new Date(val);
             return;
         }
 
-        // Compruebo fecha
-        d = new Date(val);
-        if (!isNaN(d.getTime())) {
-            this.tipo = TipoDatos.date;
-            this.valor = d;
+        if(this.isHora(val)) {   
+            this.tipo = TipoDatos.hora;
+            this.valor = val;
+            return;
+        }
+
+
+        // Compruebo numero
+        if(this.isNumber(val)) {
+            this.tipo = TipoDatos.number;
+            this.valor = parseFloat(val);
             return;
         }
 
         // Compruebo boolean
-        d = Boolean(val);
-        if (!isNaN(d)) {
+        if(this.isBoolean(val)) {
             this.tipo = TipoDatos.boolean;
-            this.valor = d;
+            this.valor = (val === 'true');
             return;
         }
 
@@ -122,8 +143,10 @@ export class Campo {
         this.nombre = this.nombre.split('ñ').join('n');
         this.nombre = this.nombre.split('\r').join('');
 
-        this.valor = this.valor.split('---').join('0');
-        this.valor = this.valor.split('\r').join('');
-        // this.valor = this.valor.split(',').join('.');
+        if(this.tipo === TipoDatos.string) {
+            this.valor = this.valor.split('---').join('0');
+            this.valor = this.valor.split('\r').join('');
+            // this.valor = this.valor.split(',').join('.');    
+        }
     }
 }
