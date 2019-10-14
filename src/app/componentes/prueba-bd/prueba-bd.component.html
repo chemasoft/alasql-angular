@@ -1,18 +1,17 @@
 <div class="container">
-  <div class="row">
-    <div class="col-sm">
-      <form>
-        <div class="form-group">
-          <input [(ngModel)]="sql" type="text" class="form-control" placeholder="Consulta SQL">
+    <div class="row">
+        <div class="col-sm">
+            <br>
+            <input [(ngModel)]="sql" type="text" class="form-control" placeholder="Consulta SQL">
+            <br>
+            <button (click)="ejecutarSQL()" class="btn btn-primary">Ejecutar</button>
+            <hr>
+            <p>{{resultado}}</p>
         </div>
-        <button (click)="ejecutarSQL()" class="btn btn-primary">Ejecutar</button>
-      </form>
-      <p>{{resultado}}</p>
-    </div>
-    <div class="col-sm">
-      <small *ngFor="let item of estados">
+        <div class="col-sm">
+            <small *ngFor="let item of estados">
         {{item}} <br>
       </small>
+        </div>
     </div>
-  </div>
 </div>

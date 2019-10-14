@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/txt-sql/src/public-api';
 import { HttpClient } from '@angular/common/http';
 
@@ -9,29 +9,34 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./prueba-bd.component.css']
 })
 export class PruebaBDComponent implements OnInit {
-  bd: Basedatos;
+  public sql = '';
 
+  bd: Basedatos;
   estados: string[] = []; // Estados por los que va pasando la base de datos al abrirse
-  sql = '';
   resultado: string;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.iniciarBDCSV();
-    //this.iniciarBDAPI();
+    // this.iniciarBDAPI();
   }
 
   ejecutarSQL() {
-    this.bd.query(this.sql);
+    this.bd.query(this.sql).subscribe({
+      next: (datos) => {
+        this.resultado = '';
+        this.resultado = JSON.stringify(datos);
+      }
+    });
   }
 
   private iniciarBDCSV() {
     // Configurar la base de datos
     this.bd = new Basedatos({
+      nombre: 'prueba',
       tipoConexion: tiposConexion.FILE,
       opciones: {
-        nombre: 'prueba',
         configTablas: [
           {
             nombreTabla: 'embalses',
@@ -53,7 +58,7 @@ export class PruebaBDComponent implements OnInit {
         start = Date.now();
       },
       complete: () => {
-        console.log("Inicialización de Base de datos completada");
+        this.estados.push('Inicialización de Base de datos completada');
       }
     });
   }
@@ -61,10 +66,10 @@ export class PruebaBDComponent implements OnInit {
   private iniciarBDAPI() {
     // Configurar la base de datos
     this.bd = new Basedatos({
+      nombre: 'prueba',
       tipoConexion: tiposConexion.API,
       opciones: {
-        nombre: 'prueba',
-        url: 'https://34.77.1.10/query',
+        url: 'http://34.77.1.10:8080/query',
         parametroSQL: 'sql'
       }
     }, this.http);
