@@ -18,8 +18,8 @@ export class PruebaBDComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.iniciarBDCSV();
-    // this.iniciarBDAPI();
+    // this.iniciarBDCSV();
+    this.iniciarBDAPI();
   }
 
   ejecutarSQL() {
@@ -27,6 +27,10 @@ export class PruebaBDComponent implements OnInit {
       next: (datos) => {
         this.resultado = '';
         this.resultado = JSON.stringify(datos);
+      },
+      error: (err) => {
+        this.resultado = '';
+        this.resultado = err.message;
       }
     });
   }
@@ -69,7 +73,7 @@ export class PruebaBDComponent implements OnInit {
       nombre: 'prueba',
       tipoConexion: tiposConexion.API,
       opciones: {
-        url: 'http://34.77.1.10:8080/query',
+        url: 'http://localhost:3000/query/',
         parametroSQL: 'sql'
       }
     }, this.http);

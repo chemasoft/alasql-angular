@@ -42,8 +42,9 @@ export class Basedatos {
     private op: OpcionesBD; // Opciones de la base de datos
 
     private cargarTablasBD() {
+        const self = this;
         const observable = new Observable<string>(observer => {
-            for (const item of (this.op.opciones as OpcionesBDFile).configTablas) {
+            for (const item of (self.op.opciones as OpcionesBDFile).configTablas) {
                 alasql.promise('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})')
                 .then((data) => {
                      alasql.promise('DROP TABLE IF EXISTS ' + item.nombreTabla + '; \
@@ -81,10 +82,17 @@ export class Basedatos {
     }
 
     private ejecutarQueryAPI(psql: string) {
+        const self = this;
         const observable = new Observable<string>(observer => {
-            const body = {sql: psql};
-            const config = { headers: new HttpHeaders().set('responseType', 'application/json') };
-            this.http.post((this.op.opciones as OpcionesBDApi).url, body, config).subscribe({
+            const body = new FormData();
+            body.append((self.op.opciones as OpcionesBDApi).parametroSQL, psql);
+            // const json = '{"' + (self.op.opciones as OpcionesBDApi).parametroSQL + '": "' + psql + '"}';
+            // const body = JSON.parse(json);
+            // const config = {
+            //     headers: new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+            // };
+            const url = (self.op.opciones as OpcionesBDApi).url;
+            self.http.post(url, body).subscribe({
                 next: (data) => observer.next((data as string)),
                 complete: () => observer.complete(),
                 error: (err) => observer.error(err)
@@ -98,12 +106,12 @@ export class Basedatos {
     public inicializarBD() {
         const self = this;
         const observable = new Observable<string>(observer => {
-            switch (this.op.tipoConexion) {
+            switch (self.op.tipoConexion) {
                 case tiposConexion.FILE:
                     // Crear la base de datos
-                    alasql.promise('CREATE INDEXEDDB DATABASE IF NOT EXISTS ' + this.op.nombre + ';\
-                    ATTACH INDEXEDDB DATABASE ' + this.op.nombre + '; \
-                    USE ' + this.op.nombre + ';')
+                    alasql.promise('CREATE INDEXEDDB DATABASE IF NOT EXISTS ' + self.op.nombre + ';\
+                    ATTACH INDEXEDDB DATABASE ' + self.op.nombre + '; \
+                    USE ' + self.op.nombre + ';')
                     .then(() => { // En este caso se ha creado la base de datos
                         self.cargarTablasBD().subscribe({
                             next: (tabla) => {
@@ -138,17 +146,22 @@ export class Basedatos {
 
     // Ejecutar una consulta en la base de datos
     public query(sql: string) {
+        const self = this;
         const observable = new Observable<string>(observer => {
-            switch (this.op.tipoConexion) {
+            switch (self.op.tipoConexion) {
                 case tiposConexion.FILE:
-                    this.ejecutarQueryFILE(sql).subscribe({
+                    self.ejecutarQueryFILE(sql).subscribe({
                         next: (data) => observer.next(data),
                         complete: () => observer.complete(),
                         error: (err) => observer.error(err)
                     });
                     break;
                 case tiposConexion.API:
-                    this.ejecutarQueryAPI(sql);
+                    self.ejecutarQueryAPI(sql).subscribe({
+                        next: (data) => observer.next(data),
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
                     break;
             }
         });
