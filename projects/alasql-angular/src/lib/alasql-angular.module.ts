@@ -6,4 +6,4 @@ import { NgModule } from '@angular/core';
   ],
   exports: []
 })
-export class TxtSqlModule { }
+export class AlasqlAngularModule { }

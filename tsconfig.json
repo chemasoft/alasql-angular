@@ -13,17 +13,17 @@
     "target": "es2015",
     "typeRoots": [
       "node_modules/@types"
-    ], 
+    ],
     "lib": [
       "es2018",
       "dom"
     ],
     "paths": {
-      "txt-sql": [
-        "dist/txt-sql"
+      "alasql-angular": [
+        "dist/alasql-angular"
       ],
-      "txt-sql/*": [
-        "dist/txt-sql/*"
+      "alasql-angular/*": [
+        "dist/alasql-angular/*"
       ]
     }
   },

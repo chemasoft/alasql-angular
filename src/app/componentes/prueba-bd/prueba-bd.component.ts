@@ -1,6 +1,6 @@
 
 import { Component, OnInit, Input } from '@angular/core';
-import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/txt-sql/src/public-api';
+import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/alasql-angular/src/public-api';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -18,8 +18,8 @@ export class PruebaBDComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    // this.iniciarBDCSV();
-    this.iniciarBDAPI();
+    this.iniciarBDCSV();
+    // this.iniciarBDAPI();
   }
 
   ejecutarSQL() {
