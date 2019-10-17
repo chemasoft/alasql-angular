@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 declare let alasql;
 
 // Definición de tipos
@@ -43,7 +43,8 @@ export class Basedatos {
 
     private cargarTablasBD() {
         const self = this;
-        const observable = new Observable<string>(observer => {
+        const lstPromesas: any[] = []; // Listado de promesas
+        lstPromesas.push(new Observable<string>(observer => {
             for (const item of (self.op.opciones as OpcionesBDFile).configTablas) {
                 alasql.promise('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})')
                 .then((data) => {
@@ -62,9 +63,9 @@ export class Basedatos {
                      observer.error(err);
                 });
             }
-        });
+        }));
 
-        return observable;
+        return forkJoin(lstPromesas);
     }
 
     private ejecutarQueryFILE(sql: string) {
@@ -114,9 +115,6 @@ export class Basedatos {
                     USE ' + self.op.nombre + ';')
                     .then(() => { // En este caso se ha creado la base de datos
                         self.cargarTablasBD().subscribe({
-                            next: (tabla) => {
-                                observer.next(tabla);
-                            },
                             complete: () => {
                                 observer.complete();
                             }
