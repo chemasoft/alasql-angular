@@ -41,6 +41,7 @@ export class Basedatos {
     // Propiedades de la base de datos
     private op: OpcionesBD; // Opciones de la base de datos
 
+    // cargar todas las tablas en la base de datos
     private cargarTablasBD() {
         const self = this;
         const lstPromesas: any[] = []; // Listado de promesas
@@ -52,14 +53,11 @@ export class Basedatos {
                      CREATE TABLE ' + item.nombreTabla + '; \
                      SELECT * INTO ' + item.nombreTabla + ' FROM ?', [data])
                      .then(() => {
-                          observer.next(item.nombreTabla);
                           observer.complete();
                      }).catch((err) => {
-                          console.log('Error:', err);
                           observer.error(err);
                      });
                 }).catch((err) => {
-                     console.log('Error:', err);
                      observer.error(err);
                 });
             }
@@ -68,6 +66,7 @@ export class Basedatos {
         return forkJoin(lstPromesas);
     }
 
+    // Ejecuta una consulta a la base de datos
     private ejecutarQueryFILE(sql: string) {
         const observable = new Observable<string>(observer => {
             const res = alasql.promise(sql)
@@ -82,16 +81,12 @@ export class Basedatos {
         return observable;
     }
 
+    // Ejecuta una consulta a por medio de api
     private ejecutarQueryAPI(psql: string) {
         const self = this;
         const observable = new Observable<string>(observer => {
             const body = new FormData();
             body.append((self.op.opciones as OpcionesBDApi).parametroSQL, psql);
-            // const json = '{"' + (self.op.opciones as OpcionesBDApi).parametroSQL + '": "' + psql + '"}';
-            // const body = JSON.parse(json);
-            // const config = {
-            //     headers: new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
-            // };
             const url = (self.op.opciones as OpcionesBDApi).url;
             self.http.post(url, body).subscribe({
                 next: (data) => observer.next((data as string)),
@@ -112,8 +107,7 @@ export class Basedatos {
                     // Crear la base de datos
                     alasql.promise('CREATE INDEXEDDB DATABASE IF NOT EXISTS ' + self.op.nombre + ';\
                     ATTACH INDEXEDDB DATABASE ' + self.op.nombre + '; \
-                    USE ' + self.op.nombre + ';')
-                    .then(() => { // En este caso se ha creado la base de datos
+                    USE ' + self.op.nombre + ';').then(() => { // En este caso se ha creado la base de datos
                         self.cargarTablasBD().subscribe({
                             complete: () => {
                                 observer.complete();
