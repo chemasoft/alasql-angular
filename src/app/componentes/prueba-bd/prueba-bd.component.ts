@@ -43,7 +43,21 @@ export class PruebaBDComponent implements OnInit {
       opciones: {
         configTablas: [
           {
-            nombreTabla: 'embalses',
+            nombreTabla: 'embalses1',
+            pathArchivo: './assets/embalses.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['Numero_de_estacion', 'fecha']
+          },
+          {
+            nombreTabla: 'embalses2',
+            pathArchivo: './assets/embalses.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['Numero_de_estacion', 'fecha']
+          },
+          {
+            nombreTabla: 'embalses3',
             pathArchivo: './assets/embalses.csv',
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
