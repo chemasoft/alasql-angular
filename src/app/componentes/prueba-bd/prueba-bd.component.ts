@@ -1,4 +1,3 @@
-
 import { Component, OnInit, Input } from '@angular/core';
 import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/alasql-angular/src/public-api';
 import { HttpClient } from '@angular/common/http';
@@ -43,8 +42,22 @@ export class PruebaBDComponent implements OnInit {
       opciones: {
         configTablas: [
           {
-            nombreTabla: 'embalses',
-            pathArchivo: './assets/embalses.csv',
+            nombreTabla: 'embalses1',
+            pathArchivo: './assets/embalses1.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['Numero_de_estacion', 'fecha']
+          },
+          {
+            nombreTabla: 'embalses2',
+            pathArchivo: './assets/embalses2.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['Numero_de_estacion', 'fecha']
+          },
+          {
+            nombreTabla: 'embalses3',
+            pathArchivo: './assets/embalses3.csv',
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
             primaryKey: ['Numero_de_estacion', 'fecha']
@@ -52,6 +65,8 @@ export class PruebaBDComponent implements OnInit {
         ]
       }
     }, this.http);
+
+    // new Test(this.bd).iniTest();
 
     this.estados.push('Iniciando la carga de tablas...');
     let start = Date.now();
