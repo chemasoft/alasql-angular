@@ -1,61 +1,152 @@
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, concat } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 declare let alasql;
 
 // Clase base de datos
 export class Basedatos {
     private op: OpcionesBD; // Opciones de la base de datos
 
+    constructor(op: OpcionesBD, private http: HttpClient) {
+        this.op = op;
+        this.http = http;
+    }
+
+    // Inicializar la Base de datos
+    public inicializarBD() {
+        const self = this;
+        const observable = new Observable<any>(observer => {
+            switch (self.op.tipoConexion) {
+                case tiposConexion.FILE:
+                    self.cargarTablasBD().subscribe({
+                        complete: () => {
+                            observer.complete();
+                        },
+                        error: (err) => {
+                            observer.error(err);
+                        }
+                    });
+                    break;
+                case tiposConexion.API:
+                    observer.complete();
+                    break;
+            }
+        });
+
+        return observable;
+    }
+
+    // Ejecutar una consulta en la base de datos
+    public query(sql: string) {
+        const self = this;
+        const observable = new Observable<any>(observer => {
+            switch (self.op.tipoConexion) {
+                case tiposConexion.FILE:
+                    self.ejecutarQueryFILE(sql).subscribe({
+                        next: (data) => observer.next(data),
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                    break;
+                case tiposConexion.API:
+                    self.ejecutarQueryAPI(sql).subscribe({
+                        next: (data) => observer.next(data),
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                    break;
+            }
+        });
+
+        return observable;
+    }
+
     // cargar todas las tablas en la base de datos
     private cargarTablasBD(): Observable<any> {
         const self = this;
         const observable = new Observable<any>(observer => {
-            for (const item of (self.op.opciones as OpcionesBDFile).configTablas) {
-                self.getDatosCSV(item).subscribe({
-                    complete: () => {
-                        observer.complete();
-                    },
-                    error: (err) => {
-                        observer.error(err);
-                    }
-                });
-                break;
-            }            
+            self.crearTablasFromFile().subscribe({
+                next: () => {
+                    observer.complete();
+                },
+                error: (err) => {
+                    observer.error(err);
+                }
+            })
         });
         
         return observable;
     }
 
-    // Crear una tabla
-    private crearTabla(item, campos): Observable<any> {
+    // Ejecuta una consulta a la base de datos
+    private ejecutarQueryFILE(sql: string) {
         const observable = new Observable<any>(observer => {
-            let sql = 'CREATE TABLE ' + item.nombreTabla + ' (';
-            for(const campo of campos) {
-                sql = sql + campo.nombre + ' ' + campo.tipo + ',';
-            }
-            sql = sql.substr(0, sql.length-1) + ')';
-
-            alasql(sql, () => {
+            const res = alasql(sql, (data) => {
+                observer.next(data);
                 observer.complete();
             }, (err) => {
                 observer.error(err);
+            })
+        });
+
+        return observable;
+    }
+
+    // Ejecuta una consulta a por medio de api
+    private ejecutarQueryAPI(psql: string) {
+        const self = this;
+        const observable = new Observable<any>(observer => {
+            const body = new FormData();
+            body.append((self.op.opciones as OpcionesBDApi).parametroSQL, psql);
+            const url = (self.op.opciones as OpcionesBDApi).url;
+            self.http.post(url, body).subscribe({
+                next: (data) => observer.next((data as string)),
+                complete: () => observer.complete(),
+                error: (err) => observer.error(err)
             });
         });
 
         return observable;
     }
 
-    // Recupera los datos de un CSV
-    private getDatosCSV(item): Observable<any> {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            alasql('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})', (data) => {
-                self.crearTabla(item, self.getCampos(data[0])).subscribe({
-                    complete: () => {
-                        alasql.tables[item.nombreTabla].data = data;
-                        observer.complete();
-                    }
+    // Recupera los datos de todas las tablas de la base de datos desde los archivos correspondientes
+    private crearTablasFromFile(): Observable<any> {
+        const array = [];
+        for (const item of (this.op.opciones as OpcionesBDFile).configTablas) {
+            array.push(
+                new Observable<any>(observer => {
+                    alasql('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})', (data) => {
+                        this.crearTabla(item, this.getCampos(data[0])).subscribe({
+                            next: () => {
+                                alasql.tables[item.nombreTabla].data = data;
+                                observer.next();
+                                observer.complete();
+                            },
+                            error: (err) => {
+                                observer.error(err);
+                            }
+                        })
+                    }, (err) => {
+                        observer.error(err);
+                    });
                 })
+            )
+        }
+
+        return forkJoin(array);
+    }
+
+    // Crear una tabla
+    private crearTabla(item: PropiedadesTabla, campos: Campo[]): Observable<any> {
+        const observable = new Observable<any>(observer => {
+            let sql = 'CREATE TABLE ' + item.nombreTabla + ' (';
+            for(const campo of campos) {
+                sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ',';
+            }
+            sql = sql.substr(0, sql.length-1) + ')';
+
+            alasql(sql, (data) => {
+                observer.next(data);
+                observer.complete();
             }, (err) => {
                 observer.error(err);
             });
@@ -85,12 +176,6 @@ export class Basedatos {
         let isBoolean = () => {
             return !check && ((valor === 'true') || (valor === 'false'));
         }
-
-        // var obj = {a: 1, b: 2, c: 3};
-
-        // for (const prop in obj) {
-        //   console.log(`obj.${prop} = ${obj[prop]}`);
-        // }
 
         for (const item in fila) {  
             check = false;
@@ -133,96 +218,6 @@ export class Basedatos {
         }
 
         return campos;
-    }
-
-    // Ejecuta una consulta a la base de datos
-    private ejecutarQueryFILE(sql: string) {
-        const observable = new Observable<any>(observer => {
-            const res = alasql(sql, (data) => {
-                observer.next(data);
-                observer.complete();
-            }, (err) => {
-                observer.error(err);
-            })
-        });
-
-        return observable;
-    }
-
-    // Ejecuta una consulta a por medio de api
-    private ejecutarQueryAPI(psql: string) {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            const body = new FormData();
-            body.append((self.op.opciones as OpcionesBDApi).parametroSQL, psql);
-            const url = (self.op.opciones as OpcionesBDApi).url;
-            self.http.post(url, body).subscribe({
-                next: (data) => observer.next((data as string)),
-                complete: () => observer.complete(),
-                error: (err) => observer.error(err)
-            });
-        });
-
-        return observable;
-    }
-
-    // Inicializar la Base de datos
-    public inicializarBD() {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            switch (self.op.tipoConexion) {
-                case tiposConexion.FILE:
-                    self.cargarTablasBD().subscribe({
-                        complete: () => {
-                            observer.complete();
-                        },
-                        error: (err) => {
-                            observer.error(err);
-                        }
-                    });
-                    break;
-                case tiposConexion.API:
-                    observer.complete();
-                    break;
-            }
-        });
-
-        return observable;
-    }
-
-    // Devuelve el nombre de la base de datos
-    public getNombreBD(op: OpcionesBD) {
-        return this.op.nombre;
-    }
-
-    constructor(op: OpcionesBD, private http: HttpClient) {
-        this.op = op;
-        this.http = http;
-    }
-
-    // Ejecutar una consulta en la base de datos
-    public query(sql: string) {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            switch (self.op.tipoConexion) {
-                case tiposConexion.FILE:
-                    self.ejecutarQueryFILE(sql).subscribe({
-                        next: (data) => observer.next(data),
-                        complete: () => observer.complete(),
-                        error: (err) => observer.error(err)
-                    });
-                    break;
-                case tiposConexion.API:
-                    self.ejecutarQueryAPI(sql).subscribe({
-                        next: (data) => observer.next(data),
-                        complete: () => observer.complete(),
-                        error: (err) => observer.error(err)
-                    });
-                    break;
-            }
-        });
-
-        return observable;
     }
 }
 

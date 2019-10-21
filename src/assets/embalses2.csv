@@ -1,0 +1,6 @@
+Lugar_de_la_estacion;Nombre_de_estacion;Numero_de_estacion;LocalX;LocalY;Nivel_de_referencia;Nombre_de_parametro;Tipo_de_parametro;Nombre_del_tipo_de_parametro;Nombre_de_serie_de_tiempo;Unidad_de_serie_de_tiempo;GlobalX;GlobalY;Longitud;Latitud;Fecha;Tiempo;Valor_Hm3;Estado_del_valor;Vol_Entrada;Vol_Embalsado;Vol_Salida
+;URRUNAGA;9828;0;0;0;Volumen Embalse;V;Volumen;Cmd-3;Hm3;0;0;-2.655106;42.957735;01/06/2019;00:00:00;0;faltante (M);0;172.92;0.22
+;URRUNAGA;9828;0;0;0;Volumen Embalse;V;Volumen;Cmd-3;Hm3;0;0;-2.655106;42.957735;02/06/2019;00:00:00;0;faltante (M);0;172.92;0.22
+;URRUNAGA;9828;0;0;0;Volumen Embalse;V;Volumen;Cmd-3;Hm3;0;0;-2.655106;42.957735;03/06/2019;00:00:00;0;faltante (M);0;172.92;0.22
+;URRUNAGA;9828;0;0;0;Volumen Embalse;V;Volumen;Cmd-3;Hm3;0;0;-2.655106;42.957735;04/06/2019;00:00:00;0;faltante (M);0;172.92;0.22
+;URRUNAGA;9828;0;0;0;Volumen Embalse;V;Volumen;Cmd-3;Hm3;0;0;-2.655106;42.957735;05/06/2019;00:00:00;0;faltante (M);0;172.92;0.22
