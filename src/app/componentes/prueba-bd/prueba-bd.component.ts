@@ -62,13 +62,6 @@ export class PruebaBDComponent implements OnInit {
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
             primaryKey: ['Numero_de_estacion', 'fecha']
-          },
-          {
-            nombreTabla: 'datos_ICA',
-            pathArchivo: './assets/datos_ICA.csv',
-            tipoArchivo: tiposArchivoBD.CSV,
-            separador: ';',
-            primaryKey: ['COD_NACIONAL', 'FECHA', 'HORA']
           }
         ]
       }

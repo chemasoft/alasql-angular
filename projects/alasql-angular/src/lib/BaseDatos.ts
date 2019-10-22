@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo } from './tipos';
 declare let alasql;
 
@@ -18,7 +18,7 @@ export class Basedatos {
         const observable = new Observable<any>(observer => {
             switch (self.op.tipoConexion) {
                 case tiposConexion.FILE:
-                    self.cargarTablasBD().subscribe({
+                    self.crearTablasFromFile().subscribe({
                         complete: () => {
                             observer.complete();
                         },
@@ -61,22 +61,6 @@ export class Basedatos {
         return observable;
     }
 
-    // cargar todas las tablas en la base de datos
-    private cargarTablasBD(): Observable<any> {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            self.crearTablasFromFile().subscribe({
-                next: () => {
-                    observer.complete();
-                },
-                error: (err) => {
-                    observer.error(err);
-                }
-            });
-        });
-        return observable;
-    }
-
     // Ejecuta una consulta a la base de datos
     private ejecutarQueryFILE(sql: string) {
         const observable = new Observable<any>(observer => {
@@ -109,56 +93,86 @@ export class Basedatos {
     }
 
     private insertarValores(item, data) {
-        const lo = [];
+        const array = [];
         for (const fila of data) {
             const sql = 'INSERT INTO ' + item.nombreTabla + ' VALUES (' + this.getValores(fila) + ')';
-            lo.push(
-                new Observable<any>(o => {
-                    alasql.promise(sql).then(() => {
-                        o.complete();
-                    }).catch((err) => {
-                        o.error(err);
-                    });
-                })
-            );
-        }
-
-        return forkJoin(lo);
-    }
-
-    // Recupera los datos de todas las tablas de la base de datos desde los archivos correspondientes
-    private crearTablasFromFile(): Observable<any> {
-        const self = this;
-        const array = [];
-        for (const item of (self.op.opciones as OpcionesBDFile).configTablas) {
             array.push(
-                new Observable<any>(observer => {
-                    alasql('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})', (data) => {
-                        self.crearTabla(item, self.getCampos(data[0])).subscribe({
-                            complete: () => {
-                                self.insertarValores(item, data).subscribe({
-                                    complete: () => {
-                                        observer.next(item.nombreTabla);
-                                        observer.complete();
-                                    },
-                                    error: (err) => {
-                                        observer.error(err);
-                                    }
-                                });
-                            },
-                            error: (err) => {
-                                observer.error(err);
-                            }
-                        });
-                    }, (err) => {
-                        observer.error(err);
-                    });
+                new Observable<any>(o => {
+                    alasql(sql, (data) => {
+                        o.next(data);
+                        o.complete();
+                    }, ((err) => {
+                        o.error(err);
+                    }));
                 })
             );
         }
 
         return forkJoin(array);
     }
+
+    // Recupera los datos de todas las tablas de la base de datos desde los archivos correspondientes
+    private crearTablasFromFile(): Observable<any> {
+        const self = this;
+        const observable = new Observable<any>(observer => {
+            self.getDatosFromFile().subscribe({
+                next: (datos) => {
+                    self.crearTablas(datos).subscribe({
+                        complete: () => {
+                            self.insertarDatosEnTablas(datos);
+                            observer.complete();
+                        },
+                        error: (err) => {
+                            observer.error(err);
+                        }
+                    })
+                },
+                error: (err) => {
+                    observer.error(err);
+                }
+            })
+        });
+
+        return observable;
+    }
+
+    // Recupera todos los datos desde los archivos
+    private getDatosFromFile(): Observable<any> {
+        const array = [];
+        for (const item of (this.op.opciones as OpcionesBDFile).configTablas) {
+            array.push(
+                new Observable<any>(observer => {
+                    alasql('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})', (data) => {
+                        observer.next(data);
+                        observer.complete();
+                    }, (err) => {
+                        observer.error(err);
+                    });
+                })
+            )
+        }
+
+        return forkJoin(array);
+    }
+
+    // Crear Todas las tablas en la base de datos
+    private crearTablas(datos: any[]): Observable<any> {
+        const array = [];
+        for (const [i,item] of (this.op.opciones as OpcionesBDFile).configTablas.entries()) {
+            array.push(this.crearTabla(item, this.getCampos(datos[i][0])));
+        }
+
+        return forkJoin(array);
+    }
+
+    // Crear Todas las tablas en la base de datos
+    private insertarDatosEnTablas(datos: any[]) {
+        for (const [i,item] of (this.op.opciones as OpcionesBDFile).configTablas.entries()) {
+            alasql.tables[item.nombreTabla].data = datos[i];
+        }
+    }
+
+
 
     // Crear una tabla
     private crearTabla(item: PropiedadesTabla, campos: Campo[]): Observable<any> {
@@ -170,6 +184,7 @@ export class Basedatos {
             sql = sql.substr(0, sql.length - 1) + ')';
 
             alasql(sql, (data) => {
+                observer.next(data);
                 observer.complete();
             }, (err) => {
                 observer.error(err);

@@ -1,6 +1,6 @@
 {
     "name": "alasql-angular",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "modulo alasql para angular",
     "keywords": ["alasql", "angular", "alasql-angular"],
     "license": "MIT",
