@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Basedatos, tiposConexion, tiposArchivoBD } from 'projects/alasql-angular/src/public-api';
+import { Basedatos } from 'projects/alasql-angular/src/public-api';
 import { HttpClient } from '@angular/common/http';
+import { tiposConexion, tiposArchivoBD } from '../../../../projects/alasql-angular/src/lib/tipos';
 
 @Component({
   selector: 'app-prueba-bd',
@@ -61,6 +62,13 @@ export class PruebaBDComponent implements OnInit {
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
             primaryKey: ['Numero_de_estacion', 'fecha']
+          },
+          {
+            nombreTabla: 'datos_ICA',
+            pathArchivo: './assets/datos_ICA.csv',
+            tipoArchivo: tiposArchivoBD.CSV,
+            separador: ';',
+            primaryKey: ['COD_NACIONAL', 'FECHA', 'HORA']
           }
         ]
       }
