@@ -3,3 +3,4 @@
  */
 
 export * from './lib/BaseDatos';
+export * from './lib/Tipos';

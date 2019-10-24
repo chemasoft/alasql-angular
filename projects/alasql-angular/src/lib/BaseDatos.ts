@@ -1,6 +1,6 @@
 import { Observable, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo } from './tipos';
+import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo } from './Tipos';
 declare let alasql;
 
 // Clase base de datos
