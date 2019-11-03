@@ -110,6 +110,24 @@ export class Basedatos {
 
         return forkJoin(array);
     }
+    
+    // Crear indices de las tablas
+    private crearIndices(): Observable<any> {
+        const arrayp = []; // Array de promesas
+        for(const item of (this.op.opciones as OpcionesBDFile).configTablas) {
+            if(item.indices.length > 0) {
+                let sql = 'CREATE INDEX ON ' + item.nombreTabla + ' (';
+                for(const index of item.indices) {
+                    sql = sql + '[' + index + '],';
+                }                
+                sql = sql.substr(0, sql.length - 1) + ')';
+                arrayp.push(alasql.promise(sql));
+            }
+        }
+
+        return forkJoin(arrayp);
+    }
+
 
     // Recupera los datos de todas las tablas de la base de datos desde los archivos correspondientes
     private crearTablasFromFile(): Observable<any> {
@@ -120,7 +138,14 @@ export class Basedatos {
                     self.crearTablas(datos).subscribe({
                         complete: () => {
                             self.insertarDatosEnTablas(datos);
-                            observer.complete();
+                            self.crearIndices().subscribe({
+                                complete: () => {
+                                    observer.complete();
+                                }, 
+                                error: (err) => {
+                                    observer.error(err);        
+                                }
+                            })                            
                         },
                         error: (err) => {
                             observer.error(err);
@@ -172,14 +197,26 @@ export class Basedatos {
         }
     }
 
-
+    // Es clave
+    private esClave(campo: string, pt: PropiedadesTabla): boolean {
+        for(const key of pt.primaryKey) {
+            if(campo === key) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // Crear una tabla
     private crearTabla(item: PropiedadesTabla, campos: Campo[]): Observable<any> {
         const observable = new Observable<any>(observer => {
             let sql = 'CREATE TABLE ' + item.nombreTabla + ' (';
             for (const campo of campos) {
-                sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ',';
+                if(this.esClave(campo.nombre,item)) {
+                    sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ' PRIMARY KEY,';
+                } else {
+                    sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ',';
+                }                
             }
             sql = sql.substr(0, sql.length - 1) + ')';
 

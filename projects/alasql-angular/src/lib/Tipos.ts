@@ -30,6 +30,13 @@ export interface PropiedadesTabla {
     tipoArchivo: tiposArchivoBD; // tipo del archivo a cargar
     separador: string; // Valido para los archivos csv
     primaryKey: string[]; // Clave primaria de la tabla
+    indices: Index[]; // Indices de la tabla
+}
+
+// Indices de una tabla
+export interface Index {
+    nombre: string;     // Nombre del indice
+    campos: string[];   // Campos del indice
 }
 
 export interface Campo {
