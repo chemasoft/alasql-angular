@@ -1,4 +1,3 @@
-import { Observable, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo } from './Tipos';
 declare let alasql;
@@ -13,156 +12,108 @@ export class Basedatos {
     }
 
     // Inicializar la Base de datos
-    public inicializarBD() {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            switch (self.op.tipoConexion) {
-                case tiposConexion.FILE:
-                    self.crearTablasFromFile().subscribe({
-                        complete: () => {
-                            observer.complete();
-                        },
-                        error: (err) => {
-                            observer.error(err);
-                        }
-                    });
-                    break;
-                case tiposConexion.API:
-                    observer.complete();
-                    break;
-            }
-        });
-
-        return observable;
+    public async inicializarBD() {
+        switch (this.op.tipoConexion) {
+            case tiposConexion.FILE:
+                try{
+                    const datos = await this.getDatosFromFile();
+                    await this.crearTablas(datos);
+                    this.insertarDatosEnTablas(datos);
+                    await this.crearIndices();     
+                } catch(err) {
+                    throw err;
+                }
+                break;
+            case tiposConexion.API:
+                break;
+        }
     }
 
     // Ejecutar una consulta en la base de datos
-    public query(sql: string) {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            switch (self.op.tipoConexion) {
-                case tiposConexion.FILE:
-                    self.ejecutarQueryFILE(sql).subscribe({
-                        next: (data) => observer.next(data),
-                        complete: () => observer.complete(),
-                        error: (err) => observer.error(err)
-                    });
-                    break;
-                case tiposConexion.API:
-                    self.ejecutarQueryAPI(sql).subscribe({
-                        next: (data) => observer.next(data),
-                        complete: () => observer.complete(),
-                        error: (err) => observer.error(err)
-                    });
-                    break;
-            }
-        });
-
-        return observable;
+    public async query(sql: string) {
+        switch (this.op.tipoConexion) {
+            case tiposConexion.FILE:
+                try {
+                    return await this.ejecutarQueryFILE(sql);
+                } catch(err) {
+                    throw err;
+                }
+            case tiposConexion.API:
+                try {
+                    return await this.ejecutarQueryAPI(sql);
+                } catch(err) {
+                    throw err;
+                }
+        }
     }
 
     // Ejecuta una consulta a la base de datos
-    private ejecutarQueryFILE(sql: string) {
-        const observable = new Observable<any>(observer => {
-            const res = alasql(sql, (data) => {
-                observer.next(data);
-                observer.complete();
-            }, (err) => {
-                observer.error(err);
-            });
-        });
-
-        return observable;
+    private async ejecutarQueryFILE(sql: string) {
+        return await alasql.promise(sql);
     }
 
     // Ejecuta una consulta a por medio de api
-    private ejecutarQueryAPI(psql: string) {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            const body = new FormData();
-            body.append((self.op.opciones as OpcionesBDApi).parametroSQL, psql);
-            const url = (self.op.opciones as OpcionesBDApi).url;
-            self.http.post(url, body).subscribe({
-                next: (data) => observer.next((data as string)),
-                complete: () => observer.complete(),
-                error: (err) => observer.error(err)
-            });
-        });
-
-        return observable;
+    private async ejecutarQueryAPI(psql: string) {
+        const body = new FormData();
+        body.append((this.op.opciones as OpcionesBDApi).parametroSQL, psql);
+        const url = (this.op.opciones as OpcionesBDApi).url;
+        return this.http.post(url, body);
     }
 
-    private insertarValores(item, data) {
-        const array = [];
+    private async insertarValores(item, data) {
         for (const fila of data) {
             const sql = 'INSERT INTO ' + item.nombreTabla + ' VALUES (' + this.getValores(fila) + ')';
-            array.push(
-                new Observable<any>(o => {
-                    alasql(sql, (data) => {
-                        o.next(data);
-                        o.complete();
-                    }, ((err) => {
-                        o.error(err);
-                    }));
-                })
-            );
+            await alasql.promise(sql);
         }
-
-        return forkJoin(array);
     }
-
-    // Recupera los datos de todas las tablas de la base de datos desde los archivos correspondientes
-    private crearTablasFromFile(): Observable<any> {
-        const self = this;
-        const observable = new Observable<any>(observer => {
-            self.getDatosFromFile().subscribe({
-                next: (datos) => {
-                    self.crearTablas(datos).subscribe({
-                        complete: () => {
-                            self.insertarDatosEnTablas(datos);
-                            observer.complete();
-                        },
-                        error: (err) => {
-                            observer.error(err);
-                        }
-                    })
-                },
-                error: (err) => {
-                    observer.error(err);
-                }
-            })
-        });
-
-        return observable;
+    
+    // Crear indices de las tablas
+    private async crearIndices() {
+        for(const item of (this.op.opciones as OpcionesBDFile).configTablas) {
+            if(item.indices.length > 0) {
+                let sql = '';
+                for(const index of item.indices) {
+                    sql = 'CREATE INDEX ' + index.nombre + ' ON ' + item.nombreTabla + ' (';
+                    for(const [i,campo] of index.campos.entries()) {
+                        sql = sql + '[' + index.campos[i] + '],';
+                    }
+                    sql = sql.substr(0, sql.length - 1) + ')';
+                }                
+                
+                await alasql.promise(sql);
+            }
+        }
     }
 
     // Recupera todos los datos desde los archivos
-    private getDatosFromFile(): Observable<any> {
-        const array = [];
+    private async getDatosFromFile() {
+        const datos = []; // Array de datos
         for (const item of (this.op.opciones as OpcionesBDFile).configTablas) {
-            array.push(
-                new Observable<any>(observer => {
-                    alasql('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})', (data) => {
-                        observer.next(data);
-                        observer.complete();
-                    }, (err) => {
-                        observer.error(err);
-                    });
-                })
-            )
+            await alasql.promise('SELECT * FROM CSV("' + item.pathArchivo + '",{separator:"' + item.separador + '"})').then((data) => {
+                datos.push(data);
+            }).catch(err => {
+                throw err;
+            });
         }
-
-        return forkJoin(array);
+        return datos;
     }
 
     // Crear Todas las tablas en la base de datos
-    private crearTablas(datos: any[]): Observable<any> {
-        const array = [];
+    private async crearTablas(datos: any[]) {
         for (const [i,item] of (this.op.opciones as OpcionesBDFile).configTablas.entries()) {
-            array.push(this.crearTabla(item, this.getCampos(datos[i][0])));
-        }
+            const campos = this.getCampos(datos[i][0]);
+            let sql = 'CREATE TABLE ' + item.nombreTabla + ' (';
+            for (const campo of campos) {
+                if(this.esClave(campo.nombre,item)) {
+                    sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ' PRIMARY KEY,';
+                } else {
+                    sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ',';
+                }                
+            }
+            sql = sql.substr(0, sql.length - 1) + ')';
 
-        return forkJoin(array);
+            await alasql.promise(sql);
+        }
     }
 
     // Crear Todas las tablas en la base de datos
@@ -172,26 +123,14 @@ export class Basedatos {
         }
     }
 
-
-
-    // Crear una tabla
-    private crearTabla(item: PropiedadesTabla, campos: Campo[]): Observable<any> {
-        const observable = new Observable<any>(observer => {
-            let sql = 'CREATE TABLE ' + item.nombreTabla + ' (';
-            for (const campo of campos) {
-                sql = sql + '[' + campo.nombre + '] ' + campo.tipo + ',';
+    // Es clave
+    private esClave(campo: string, pt: PropiedadesTabla): boolean {
+        for(const key of pt.primaryKey) {
+            if(campo === key) {
+                return true;
             }
-            sql = sql.substr(0, sql.length - 1) + ')';
-
-            alasql(sql, (data) => {
-                observer.next(data);
-                observer.complete();
-            }, (err) => {
-                observer.error(err);
-            });
-        });
-
-        return observable;
+        }
+        return false;
     }
 
     private isFecha = (valor) => {
