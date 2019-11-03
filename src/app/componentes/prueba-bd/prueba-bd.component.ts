@@ -22,20 +22,18 @@ export class PruebaBDComponent implements OnInit {
     // this.iniciarBDAPI();
   }
 
-  ejecutarSQL() {
-    this.bd.query(this.sql).subscribe({
-      next: (datos) => {
-        this.resultado = '';
-        this.resultado = JSON.stringify(datos);
-      },
-      error: (err) => {
-        this.resultado = '';
-        this.resultado = err.message;
-      }
-    });
+  async ejecutarSQL() {
+    try {
+      const datos = await this.bd.query(this.sql);
+      this.resultado = '';
+      this.resultado = JSON.stringify(datos);
+    } catch(err) {
+      this.resultado = '';
+      this.resultado = err.message;
+    }
   }
 
-  private iniciarBDCSV() {
+  private async iniciarBDCSV() {
     // Configurar la base de datos
     this.bd = new Basedatos({
       nombre: 'prueba',
@@ -47,21 +45,24 @@ export class PruebaBDComponent implements OnInit {
             pathArchivo: './assets/embalses1.csv',
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha']
+            primaryKey: ['Numero_de_estacion', 'fecha'],
+            indices: [{nombre: 'idx1', campos: ['LocalX']}]
           },
           {
             nombreTabla: 'embalses2',
             pathArchivo: './assets/embalses2.csv',
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha']
+            primaryKey: ['Numero_de_estacion', 'fecha'],
+            indices: [{nombre: 'idx1', campos: ['LocalX','LocalY']}]
           },
           {
             nombreTabla: 'embalses3',
             pathArchivo: './assets/embalses3.csv',
             tipoArchivo: tiposArchivoBD.CSV,
             separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha']
+            primaryKey: ['Numero_de_estacion', 'fecha'],
+            indices: []
           }
         ]
       }
@@ -71,16 +72,9 @@ export class PruebaBDComponent implements OnInit {
 
     this.estados.push('Iniciando la carga de tablas...');
     let start = Date.now();
-    this.bd.inicializarBD().subscribe({
-      next: (tabla) => {
-        const end = Date.now();
-        this.estados.push('Tabla ' + tabla + ' cargada: ' + (end - start) + ' ms');
-        start = Date.now();
-      },
-      complete: () => {
-        this.estados.push('Inicialización de Base de datos completada');
-      }
-    });
+    await this.bd.inicializarBD();
+    const end = Date.now();
+    this.estados.push('Inicialización de Base de datos completada...' + (end - start) + ' ms');
   }
 
   private iniciarBDAPI() {
