@@ -1,22 +1,25 @@
 # alasql-angular
 
-Proporciona una clase BaseDatos, utilizada para incorporar un conjunto de ficheros locales CSV, al almacenamiento IndexedBD del navegador, y posteriormente poder usarlo mediante consultas SQL, como si se tratara de una base de datos relacional, para ello utiliza la libreria alasql
+Proporciona una clase llamada BaseDatos, utilizada para incorporar un conjunto de ficheros locales de tipo CSV, a la memoria del navegador, como si se tratara de tablas, y posteriormente poder usarlas mediante consultas SQL, como una base de datos relacional, para ello se utiliza la libreria alasql.
 
-## Instalación
+It provides a class called BaseDatos, used to incorporate a set of local files of type CSV, into the browser's memory, as if they were tables, and then be able to use them through SQL queries, as a relational database, for this purpose it is used alasql library
 
 - Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body 
-<script src="https://cdn.jsdelivr.net/npm/alasql@0.5"></script>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/alasql@0.5.3"></script>
+  <app-root></app-root>
+</body>
 
-- Paso 2: Importa la clase BaseDatos, donde la necesitas:
-import { Basedatos } from 'alasql-angular';
+
+- Paso 2: Importa las siguientes clases, donde las necesitas:
+import { Basedatos, tiposConexion, tiposArchivoBD } from 'alasql-angular';
 
 - Paso 3: Codigo de ejemplo:
 
 ```
 import { Component, OnInit, Input } from '@angular/core';
-import { Basedatos } from 'projects/alasql-angular/src/public-api';
 import { HttpClient } from '@angular/common/http';
-import { tiposConexion, tiposArchivoBD } from '../../../../projects/alasql-angular/src/lib/Tipos';
+import { Basedatos, tiposConexion, tiposArchivoBD } from 'alasql-angular';
 
 @Component({
   selector: 'app-prueba-bd',

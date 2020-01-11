@@ -1,7 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Basedatos } from 'projects/alasql-angular/src/public-api';
 import { HttpClient } from '@angular/common/http';
-import { tiposConexion, tiposArchivoBD } from '../../../../projects/alasql-angular/src/lib/Tipos';
+import { Basedatos, tiposConexion, tiposArchivoBD } from 'alasql-angular';
 
 @Component({
   selector: 'app-prueba-bd',

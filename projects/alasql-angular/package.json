@@ -1,20 +1,24 @@
 {
-    "name": "alasql-angular",
-    "version": "0.0.7",
-    "description": "modulo alasql para angular",
-    "keywords": ["alasql", "angular", "alasql-angular"],
-    "license": "MIT",
-    "author": {
-        "name": "Chemasoft",
-        "email": "jmarand@gmail.com",
-        "url": "https://github.com/chemasoft/alasql-angular"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/chemasoft/alasql-angular"
-    },
-    "peerDependencies": {
-        "@angular/common": "^8.2.0",
-        "@angular/core": "^8.2.0"
-    }
+  "name": "alasql-angular",
+  "version": "0.0.7",
+  "description": "modulo alasql para angular",
+  "keywords": [
+    "alasql",
+    "angular",
+    "alasql-angular"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Chemasoft",
+    "email": "jmarand@gmail.com",
+    "url": "https://github.com/chemasoft/alasql-angular"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chemasoft/alasql-angular"
+  },
+  "peerDependencies": {
+    "@angular/common": "^8.2.14",
+    "@angular/core": "^8.2.14"
+  }
 }

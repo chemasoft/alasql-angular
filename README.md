@@ -1,109 +1,27 @@
-# alasql-angular
+# AlasqlAngular
 
-Proporciona una clase BaseDatos, utilizada para incorporar un conjunto de ficheros locales CSV, al almacenamiento IndexedBD del navegador, y posteriormente poder usarlo mediante consultas SQL, como si se tratara de una base de datos relacional, para ello utiliza la libreria alasql
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.19.
 
-## Instalación
+## Development server
 
-- Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body 
-<script src="https://cdn.jsdelivr.net/npm/alasql@0.5"></script>
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-- Paso 2: Importa la clase BaseDatos, donde la necesitas:
-import { Basedatos } from 'alasql-angular';
+## Code scaffolding
 
-- Paso 3: Codigo de ejemplo:
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-```
-import { Component, OnInit, Input } from '@angular/core';
-import { Basedatos } from 'projects/alasql-angular/src/public-api';
-import { HttpClient } from '@angular/common/http';
-import { tiposConexion, tiposArchivoBD } from '../../../../projects/alasql-angular/src/lib/Tipos';
+## Build
 
-@Component({
-  selector: 'app-prueba-bd',
-  templateUrl: './prueba-bd.component.html',
-  styleUrls: ['./prueba-bd.component.css']
-})
-export class PruebaBDComponent implements OnInit {
-  public sql = '';
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-  bd: Basedatos;
-  estados: string[] = []; // Estados por los que va pasando la base de datos al abrirse
-  resultado: string;
+## Running unit tests
 
-  constructor(private http: HttpClient) {}
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-  ngOnInit() {
-    this.iniciarBDCSV();
-    // this.iniciarBDAPI();
-  }
+## Running end-to-end tests
 
-  async ejecutarSQL() {
-    try {
-      const datos = await this.bd.query(this.sql);
-      this.resultado = '';
-      this.resultado = JSON.stringify(datos);
-    } catch(err) {
-      this.resultado = '';
-      this.resultado = err.message;
-    }
-  }
+Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
 
-  private async iniciarBDCSV() {
-    // Configurar la base de datos
-    this.bd = new Basedatos({
-      nombre: 'prueba',
-      tipoConexion: tiposConexion.FILE,
-      opciones: {
-        configTablas: [
-          {
-            nombreTabla: 'embalses1',
-            pathArchivo: './assets/embalses1.csv',
-            tipoArchivo: tiposArchivoBD.CSV,
-            separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha'],
-            indices: [{nombre: 'idx1', campos: ['LocalX']}]
-          },
-          {
-            nombreTabla: 'embalses2',
-            pathArchivo: './assets/embalses2.csv',
-            tipoArchivo: tiposArchivoBD.CSV,
-            separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha'],
-            indices: [{nombre: 'idx1', campos: ['LocalX','LocalY']}]
-          },
-          {
-            nombreTabla: 'embalses3',
-            pathArchivo: './assets/embalses3.csv',
-            tipoArchivo: tiposArchivoBD.CSV,
-            separador: ';',
-            primaryKey: ['Numero_de_estacion', 'fecha'],
-            indices: []
-          }
-        ]
-      }
-    }, this.http);
+## Further help
 
-    // new Test(this.bd).iniTest();
-
-    this.estados.push('Iniciando la carga de tablas...');
-    let start = Date.now();
-    await this.bd.inicializarBD();
-    const end = Date.now();
-    this.estados.push('Inicialización de Base de datos completada...' + (end - start) + ' ms');
-  }
-
-  private iniciarBDAPI() {
-    // Configurar la base de datos
-    this.bd = new Basedatos({
-      nombre: 'prueba',
-      tipoConexion: tiposConexion.API,
-      opciones: {
-        url: 'http://localhost:3000/query/',
-        parametroSQL: 'sql'
-      }
-    }, this.http);
-
-    this.bd.inicializarBD(); // Inicializar la Base de datos
-  }
-}
-```
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
