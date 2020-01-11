@@ -4,11 +4,7 @@ Proporciona una clase llamada BaseDatos, utilizada para incorporar un conjunto d
 
 It provides a class called BaseDatos, used to incorporate a set of local files of type CSV, into the browser's memory, as if they were tables, and then be able to use them through SQL queries, as a relational database, for this purpose it is used alasql library
 
-- Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body 
-<body>
-  <script src="https://cdn.jsdelivr.net/npm/alasql@0.5.3"></script>
-  <app-root></app-root>
-</body>
+- Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body https://cdn.jsdelivr.net/npm/alasql@0.5.3
 
 
 - Paso 2: Importa las siguientes clases, donde las necesitas:
