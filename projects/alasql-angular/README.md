@@ -6,7 +6,6 @@ It provides a class called BaseDatos, used to incorporate a set of local files o
 
 - Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body https://cdn.jsdelivr.net/npm/alasql@0.5.3
 
-
 - Paso 2: Importa las siguientes clases, donde las necesitas:
 import { Basedatos, tiposConexion, tiposArchivoBD } from 'alasql-angular';
 
