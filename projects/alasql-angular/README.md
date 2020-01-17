@@ -1,8 +1,8 @@
 # alasql-angular
 
-Proporciona una clase llamada BaseDatos, utilizada para incorporar un conjunto de ficheros locales de tipo CSV, a la memoria del navegador, como si se tratara de tablas, y posteriormente poder usarlas mediante consultas SQL, como una base de datos relacional, para ello se utiliza la libreria alasql.
-
 It provides a class called BaseDatos, used to incorporate a set of local files of type CSV, into the browser's memory, as if they were tables, and then be able to use them through SQL queries, as a relational database, for this purpose it is used alasql library
+
+Proporciona una clase llamada BaseDatos, utilizada para incorporar un conjunto de ficheros locales de tipo CSV, a la memoria del navegador, como si se tratara de tablas, y posteriormente poder usarlas mediante consultas SQL, como una base de datos relacional, para ello se utiliza la libreria alasql.
 
 - Paso 1: Abre el fichero index.html de tu proyecto angular e incluye el CDN de alasql dentro del body https://cdn.jsdelivr.net/npm/alasql@0.5.3
 

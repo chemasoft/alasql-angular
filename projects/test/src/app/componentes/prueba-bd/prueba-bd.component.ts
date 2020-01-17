@@ -17,8 +17,8 @@ export class PruebaBDComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.iniciarBDCSV();
-    // this.iniciarBDAPI();
+    // this.iniciarBDCSV();
+    this.iniciarBDAPI();
   }
 
   async ejecutarSQL() {
@@ -67,26 +67,28 @@ export class PruebaBDComponent implements OnInit {
       }
     }, this.http);
 
-    // new Test(this.bd).iniTest();
-
-    this.estados.push('Iniciando la carga de tablas...');
-    let start = Date.now();
-    await this.bd.inicializarBD();
-    const end = Date.now();
-    this.estados.push('Inicialización de Base de datos completada...' + (end - start) + ' ms');
+    this.iniciarBD();    
   }
 
   private iniciarBDAPI() {
     // Configurar la base de datos
     this.bd = new Basedatos({
-      nombre: 'prueba',
+      nombre: 'sgca',
       tipoConexion: tiposConexion.API,
       opciones: {
-        url: 'http://localhost:3000/query/',
+        url: 'http://localhost:3000/sgca/',
         parametroSQL: 'sql'
       }
     }, this.http);
 
-    this.bd.inicializarBD(); // Inicializar la Base de datos
+    this.iniciarBD();
+  }
+
+  private async iniciarBD() {
+    this.estados.push('Inicializando Base Datos...');
+    let start = Date.now();
+    await this.bd.inicializarBD();
+    const end = Date.now();
+    this.estados.push('Inicialización de Base de datos completada...' + (end - start) + ' ms');
   }
 }

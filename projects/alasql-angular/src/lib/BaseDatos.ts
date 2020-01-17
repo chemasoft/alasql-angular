@@ -57,7 +57,7 @@ export class Basedatos {
         const body = new FormData();
         body.append((this.op.opciones as OpcionesBDApi).parametroSQL, psql);
         const url = (this.op.opciones as OpcionesBDApi).url;
-        return this.http.post(url, body);
+        return this.http.post(url, body).toPromise();
     }
 
     private async insertarValores(item, data) {
