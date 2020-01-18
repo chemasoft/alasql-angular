@@ -1,6 +1,6 @@
 {
   "name": "alasql-angular",
-  "version": "0.0.12",
+  "version": "0.0.16",
   "description": "modulo alasql para angular",
   "keywords": [
     "alasql",
@@ -19,7 +19,9 @@
   },
   "peerDependencies": {
     "@angular/common": "^8.2.14",
-    "@angular/core": "^8.2.14",
-    "xlsx": "^0.15.4"
+    "@angular/core": "^8.2.14"
+  },
+  "dependencies": {
+    "xlsx": "0.15.4"
   }
 }
