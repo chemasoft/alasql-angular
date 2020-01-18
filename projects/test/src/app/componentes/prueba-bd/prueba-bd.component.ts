@@ -17,8 +17,8 @@ export class PruebaBDComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    // this.iniciarBDCSV();
-    this.iniciarBDAPI();
+    this.iniciarBDCSV();
+    // this.iniciarBDAPI();
   }
 
   async ejecutarSQL() {

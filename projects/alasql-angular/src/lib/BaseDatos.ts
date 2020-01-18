@@ -1,14 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo } from './Tipos';
+import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo, AlaSQL } from './Tipos';
 declare let alasql;
 
 // Clase base de datos
 export class Basedatos {
     private op: OpcionesBD; // Opciones de la base de datos
+    public alasql: AlaSQL
 
-    constructor(op: OpcionesBD, private http: HttpClient) {
-        this.op = op;
-        this.http = http;
+    constructor(op?: OpcionesBD, private http?: HttpClient) {
+        if(op) this.op = op;
+        if(http) this.http = http;
+        this.alasql = alasql;
     }
 
     // Inicializar la Base de datos
@@ -222,3 +224,4 @@ export class Basedatos {
         return campos;
     }
 }
+;
