@@ -10,7 +10,7 @@ Proporciona una clase llamada BaseDatos, utilizada para incorporar un conjunto d
 ```
 import { Basedatos } from 'alasql-angular';
 
-const bd: Basedatos();
+const bd = new Basedatos();
 bd.alasql;
 
 ......
