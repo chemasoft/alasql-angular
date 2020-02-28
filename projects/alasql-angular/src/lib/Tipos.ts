@@ -3,7 +3,8 @@
 // Interfaz para las distintas opciones de la base de datos
 export enum tiposConexion {
     FILE,
-    API
+    API,
+    GRAPHQL
 }
 export enum tiposArchivoBD {
     CSV
@@ -17,10 +18,14 @@ export interface OpcionesBDApi {
     parametroSQL: string; // paremetro donde se envia la SQL
 }
 
+export interface OpcionesBDGrapthQL {
+    url: string;
+}
+
 export interface OpcionesBD {
     nombre: string; // Nombre de la base de datos
     tipoConexion: tiposConexion;
-    opciones: OpcionesBDApi | OpcionesBDFile;
+    opciones: OpcionesBDApi | OpcionesBDFile | OpcionesBDGrapthQL;
 }
 
 // Propiedades de cada tabla de la base de datos

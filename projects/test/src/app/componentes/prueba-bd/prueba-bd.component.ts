@@ -17,8 +17,8 @@ export class PruebaBDComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.iniciarBDCSV();
-    // this.iniciarBDAPI();
+    //this.iniciarBDCSV();
+    this.iniciarBDAPI();
   }
 
   async ejecutarSQL() {
@@ -74,10 +74,9 @@ export class PruebaBDComponent implements OnInit {
     // Configurar la base de datos
     this.bd = new Basedatos({
       nombre: 'sgca',
-      tipoConexion: tiposConexion.API,
+      tipoConexion: tiposConexion.GRAPHQL,
       opciones: {
-        url: 'http://localhost:3000/sgca/',
-        parametroSQL: 'sql'
+        url: 'http://localhost:8080/v1/graphql/'
       }
     }, this.http);
 

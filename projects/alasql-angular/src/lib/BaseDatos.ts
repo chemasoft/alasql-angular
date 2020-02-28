@@ -32,17 +32,23 @@ export class Basedatos {
     }
 
     // Ejecutar una consulta en la base de datos
-    public async query(sql: string) {
+    public async query(query: string) {
         switch (this.op.tipoConexion) {
             case tiposConexion.FILE:
                 try {
-                    return await this.ejecutarQueryFILE(sql);
+                    return await this.ejecutarQueryFILE(query);
                 } catch(err) {
                     throw err;
                 }
             case tiposConexion.API:
                 try {
-                    return await this.ejecutarQueryAPI(sql);
+                    return await this.ejecutarQueryAPI(query);
+                } catch(err) {
+                    throw err;
+                }
+            case tiposConexion.GRAPHQL:
+                try {
+                    return await this.ejecutarQueryGraphQL(query);
                 } catch(err) {
                     throw err;
                 }
@@ -61,6 +67,17 @@ export class Basedatos {
         const url = (this.op.opciones as OpcionesBDApi).url;
         return this.http.post(url, body).toPromise();
     }
+
+    // Ejecuta una consulta a por medio de api
+    private async ejecutarQueryGraphQL(psql: string) {
+        const body = JSON.stringify({
+            query: psql,
+            variables: {}
+        });
+        const url = (this.op.opciones as OpcionesBDApi).url;
+        return this.http.post(url, body).toPromise();
+    }
+
 
     private async insertarValores(item, data) {
         for (const fila of data) {
