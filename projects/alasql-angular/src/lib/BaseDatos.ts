@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { OpcionesBD, tiposConexion, OpcionesBDApi, OpcionesBDFile, PropiedadesTabla, Campo, AlaSQL } from './Tipos';
 declare let alasql;
 
@@ -60,13 +60,22 @@ export class Basedatos {
         return await alasql.promise(sql);
     }
 
+    // // Ejecuta una consulta a por medio de api
+    // private async ejecutarQueryAPI(psql: string) {
+    //     const body = new FormData();
+    //     body.append((this.op.opciones as OpcionesBDApi).parametroSQL, psql);
+    //     const url = (this.op.opciones as OpcionesBDApi).url;
+    //     return this.http.post(url, body).toPromise();
+    // }
+
     // Ejecuta una consulta a por medio de api
     private async ejecutarQueryAPI(psql: string) {
-        const body = new FormData();
-        body.append((this.op.opciones as OpcionesBDApi).parametroSQL, psql);
+        const query = (this.op.opciones as OpcionesBDApi).parametroSQL + "="+ psql;
         const url = (this.op.opciones as OpcionesBDApi).url;
-        return this.http.post(url, body).toPromise();
+        const cabeceras = new HttpHeaders().set('Content-Type','application/x-www-form-urlencoded');
+        return this.http.post(url, query, {headers: cabeceras}).toPromise();
     }
+
 
     // Ejecuta una consulta a por medio de api
     private async ejecutarQueryGraphQL(psql: string) {
